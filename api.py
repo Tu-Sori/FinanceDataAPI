@@ -136,8 +136,19 @@ async def get_market_chart(
         raise HTTPException(status_code=404, detail="Market not found")
 
 
+@router.get("/wics")
+async def get_wics():
+    def group_and_classify_by_sector(df_market):
+        grouped_by_sector = df_market.groupby('Sector')
+        sector_names = list(grouped_by_sector.groups.keys())
+        return sector_names
+
+    krx_sector_names = group_and_classify_by_sector(merged_df)
+    return krx_sector_names
+
+
 @router.get("/wics/{sector}")
-async def get_wics(
+async def get_wics_select(
         sector: str = Path(..., description="sector: 업종명")):
     sector_data = merged_df_sorted[merged_df_sorted['Sector'] == sector]
 
