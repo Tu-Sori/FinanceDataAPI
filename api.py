@@ -166,25 +166,23 @@ async def get_company_info(
     def get_stock_data_by_name(name):
         name_data = merged_df_sorted[merged_df_sorted['Name'] == name]
 
-        # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가
+        # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가, 상장주식수
         selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
-                            'Volume', 'Marcap']
+                            'Volume', 'Marcap', 'Stocks']
         name_data = name_data[selected_columns]
 
         return name_data
 
     def get_per_pbr_for_ticker(all_fundamental, ticker):
-        per_pbr_df = all_fundamental.loc[all_fundamental.index == ticker, ['PER', 'PBR']]
+        per_pbr_df = all_fundamental.loc[all_fundamental.index == ticker, ['PER', 'PBR', 'EPS', 'DIV']]
         return per_pbr_df
 
     def get_top_5_stocks_by_sector(sector, name):
         sector_stocks = merged_df_sorted[merged_df_sorted['Sector'] == sector]
 
-        top_5_stocks = sector_stocks.nlargest(6, 'Volume')
-
         # 기업코드, 기업명, 현재가, 전일비, 등락률, 거래량, 시가총액
         selected_columns = ['Code', 'Name', 'Close', 'ChagesRatio', 'Volume', 'Marcap']
-        top_5_stocks = top_5_stocks[selected_columns]
+        top_5_stocks = sector_stocks[selected_columns]
 
         if name in top_5_stocks['Name'].values:
             top_5_stocks = top_5_stocks[top_5_stocks['Name'] != name].head(5)
@@ -194,6 +192,7 @@ async def get_company_info(
         return top_5_stocks
 
     stock_data_selected_name = get_stock_data_by_name(name)
+
     current_date = datetime.today().strftime('%Y%m%d')
     all_fundamental = stock.get_market_fundamental(current_date, market='ALL')
 
