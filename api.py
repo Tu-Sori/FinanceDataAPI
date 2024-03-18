@@ -211,8 +211,10 @@ async def get_company_info(
     for idx, row in top_5_stocks_by_sector.iterrows():
         ticker2 = row['Code']
         per_pbr_df = get_per_pbr_for_ticker(all_fundamental, ticker2)
+
         combined_result2 = row.to_dict()
         combined_result2.update(per_pbr_df.iloc[0].to_dict())
+
         top_5_stocks_info.append(combined_result2)
 
     return {
