@@ -12,7 +12,16 @@ router = APIRouter()
 def calculate_date_ranges():
     current_date = datetime.today()
     yesterday = current_date - timedelta(days=1)
-    two_days_ago = current_date - timedelta(days=2)
+
+    day_of_week = current_date.weekday()
+
+    if day_of_week == 0:
+        two_days_ago = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
+    elif day_of_week == 5:
+        two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
+    elif day_of_week == 6:
+        two_days_ago = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
+
     one_week_ago = (current_date - timedelta(days=9)).strftime('%Y-%m-%d')
     one_month_ago = (current_date - timedelta(days=32)).strftime('%Y-%m-%d')
     three_months_ago = (current_date - timedelta(days=3*30+2)).strftime('%Y-%m-%d')
@@ -21,8 +30,8 @@ def calculate_date_ranges():
     ten_years_ago = (current_date - timedelta(days=10*365+2)).strftime('%Y-%m-%d')
     return {
         "current_date": current_date,
-        "yesterday" : yesterday,
-        "two_days_ago" : two_days_ago,
+        "yesterday": yesterday,
+        "two_days_ago": two_days_ago,
         "one_week_ago": one_week_ago,
         "one_month_ago": one_month_ago,
         "three_months_ago": three_months_ago,
@@ -52,6 +61,7 @@ merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
 async def get_kospi_kosdaq_top5():
     # KOSPI, KOSDAQ, USD/KRW
     date_ranges = calculate_date_ranges()
+    print(date_ranges)
     kospi_today = get_stock_data('KS11', date_ranges["two_days_ago"], date_ranges["current_date"])
     kosdaq_today = get_stock_data('KQ11', date_ranges["two_days_ago"], date_ranges["current_date"])
     usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["two_days_ago"], date_ranges["current_date"])
@@ -76,7 +86,7 @@ async def get_kospi_kosdaq_top5():
         "kosdaq": kosdaq,
         "close_price": close_price,
         "price_change": price_change,
-        "percentage_change" : percentage_change,
+        "percentage_change": percentage_change,
         "top_5_kospi": top_5_kospi,
         "top_5_kosdaq": top_5_kosdaq,
         "top_5_konex": top_5_konex
