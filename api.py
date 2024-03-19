@@ -62,6 +62,10 @@ merged_df.fillna({'Sector': '우선주'}, inplace=True)
 merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
 merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
 
+@router.get("/")
+async def read_root():
+    return {"message": "Hello, World"}
+
 @router.get("/home")
 async def get_kospi_kosdaq_top5():
     # KOSPI, KOSDAQ, USD/KRW
@@ -151,8 +155,13 @@ async def get_market_chart(
         raise HTTPException(status_code=404, detail="Market not found")
 
 
+<<<<<<< HEAD
 @router.get("/wics")
 async def get_wics():
+=======
+@router.get("/sic")
+async def get_sic():
+>>>>>>> 5d167a1 (hello, world )
     kospi_info = merged_df[merged_df['Market'] == 'KOSPI']
     kosdaq_info = merged_df[merged_df['Market'] == 'KOSDAQ']
     konex_info = merged_df[merged_df['Market'] == 'KONEX']
@@ -173,10 +182,10 @@ async def get_wics():
     }
 
 
-@router.get("/wics/{sector}")
-async def get_wics_select(
+@router.get("/sic/{sector}")
+async def get_sic_select(
         sector: str = Path(..., description="sector: 업종명")):
-    sector_data = merged_df_sorted[merged_df_sorted['Sector'] == sector]
+    sector_data = merged_df_sorted_m[merged_df_sorted_m['Sector'] == sector]
 
     # 종목명, 현재가, 전일비, 등락률, 거래량
     selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
@@ -185,7 +194,7 @@ async def get_wics_select(
     return sector_data
 
 
-@router.get("/wics/{sector}/{name}")
+@router.get("/sic/{sector}/{name}")
 async def get_company_info(
         sector: str = Path(..., description="sector: 업종명"),
         name: str = Path(..., description="name: 기업명")):
