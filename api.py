@@ -21,6 +21,8 @@ def calculate_date_ranges():
         two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
     elif day_of_week == 6:
         two_days_ago = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
+    else:
+        two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
 
     one_week_ago = (current_date - timedelta(days=9)).strftime('%Y-%m-%d')
     one_month_ago = (current_date - timedelta(days=32)).strftime('%Y-%m-%d')
@@ -56,6 +58,7 @@ df_krx_desc = fdr.StockListing('KRX-DESC')
 df_krx = fdr.StockListing('KRX')
 merged_df = pd.merge(df_krx, df_krx_desc[['Code', 'Sector']], on='Code', how='inner')
 merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
+merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
 
 @router.get("/home")
 async def get_kospi_kosdaq_top5():
@@ -174,7 +177,7 @@ async def get_company_info(
         sector: str = Path(..., description="sector: 업종명"),
         name: str = Path(..., description="name: 기업명")):
     def get_stock_data_by_name(name):
-        name_data = merged_df_sorted[merged_df_sorted['Name'] == name]
+        name_data = merged_df_sorted_m[merged_df_sorted_m['Name'] == name]
 
         # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가, 상장주식수
         selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
@@ -188,7 +191,7 @@ async def get_company_info(
         return per_pbr_df
 
     def get_top_5_stocks_by_sector(sector, name):
-        sector_stocks = merged_df_sorted[merged_df_sorted['Sector'] == sector]
+        sector_stocks = merged_df_sorted_m[merged_df_sorted_m['Sector'] == sector]
 
         # 기업코드, 기업명, 현재가, 전일비, 등락률, 거래량, 시가총액
         selected_columns = ['Code', 'Name', 'Close', 'ChagesRatio', 'Volume', 'Marcap']
