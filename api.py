@@ -57,6 +57,8 @@ def get_top_n_stocks(market, n=5):
 df_krx_desc = fdr.StockListing('KRX-DESC')
 df_krx = fdr.StockListing('KRX')
 merged_df = pd.merge(df_krx, df_krx_desc[['Code', 'Sector']], on='Code', how='inner')
+merged_df.fillna({'Sector': '우선주'}, inplace=True)
+
 merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
 merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
 
@@ -151,13 +153,24 @@ async def get_market_chart(
 
 @router.get("/wics")
 async def get_wics():
+    kospi_info = merged_df[merged_df['Market'] == 'KOSPI']
+    kosdaq_info = merged_df[merged_df['Market'] == 'KOSDAQ']
+    konex_info = merged_df[merged_df['Market'] == 'KONEX']
+
     def group_and_classify_by_sector(df_market):
         grouped_by_sector = df_market.groupby('Sector')
         sector_names = list(grouped_by_sector.groups.keys())
         return sector_names
 
-    krx_sector_names = group_and_classify_by_sector(merged_df)
-    return krx_sector_names
+    kospi_sectors = group_and_classify_by_sector(kospi_info)
+    kosdaq_sectors = group_and_classify_by_sector(kosdaq_info)
+    konex_sectors = group_and_classify_by_sector(konex_info)
+
+    return {
+        "KOSPI": kospi_sectors,
+        "KOSDAQ": kosdaq_sectors,
+        "KONEX": konex_sectors
+    }
 
 
 @router.get("/wics/{sector}")
