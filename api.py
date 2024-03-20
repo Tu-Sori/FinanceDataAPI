@@ -154,14 +154,8 @@ async def get_market_chart(
     else:
         raise HTTPException(status_code=404, detail="Market not found")
 
-
-<<<<<<< HEAD
-@router.get("/wics")
-async def get_wics():
-=======
 @router.get("/sic")
 async def get_sic():
->>>>>>> 5d167a1 (hello, world )
     kospi_info = merged_df[merged_df['Market'] == 'KOSPI']
     kosdaq_info = merged_df[merged_df['Market'] == 'KOSDAQ']
     konex_info = merged_df[merged_df['Market'] == 'KONEX']
