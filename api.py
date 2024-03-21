@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Query, HTTPException, Path
-from matplotlib import pyplot as plt
 from pykrx import stock
 from datetime import datetime, timedelta
 import pandas as pd
 import FinanceDataReader as fdr
 import mplfinance as mpf
+import crud
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/fastapi",
+)
 
 # 기간 설정
 def calculate_date_ranges():
@@ -46,7 +48,7 @@ def calculate_date_ranges():
 def get_stock_data(stock_code, start_date, end_date):
     return fdr.DataReader(stock_code, start_date, end_date)
 
-# 종목 리스트
+# 종목 리스트 5개
 def get_top_n_stocks(market, n=5):
     df = fdr.StockListing(market)
     df_sorted = df.sort_values(by='Volume', ascending=False)
@@ -62,15 +64,58 @@ merged_df.fillna({'Sector': '우선주'}, inplace=True)
 merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
 merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
 
+# 이름 -> 기업정보
+def get_stock_data_by_name(name):
+    name_data = merged_df_sorted_m[merged_df_sorted_m['Name'] == name]
+
+    # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가, 상장주식수
+    selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
+                        'Volume', 'Marcap', 'Stocks']
+    name_data = name_data[selected_columns]
+
+    return name_data
+
+# 기업코드 -> 기업정보
+def get_stock_data_by_code(code):
+    sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
+
+    # 기업코드, 종목명, 현재가, 전일비, 등락률, 시가, 고가, 저가, 거래량, 시가총액
+    selected_colums = ['Code', 'Sector', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
+    'Voume', 'Marcap']
+    sector_data = sector_data[selected_colums]
+
+    return sector_data
+
+# 'PER', 'PBR', 'EPS', 'DIV'
+def get_per_pbr_for_ticker(all_fundamental, ticker):
+    per_pbr_df = all_fundamental.loc[all_fundamental.index == ticker, ['PER', 'PBR', 'EPS', 'DIV']]
+    return per_pbr_df
+
+# 동일 업종 기업 5개
+def get_top_5_stocks_by_sector(sector, name):
+    sector_stocks = merged_df_sorted_m[merged_df_sorted_m['Sector'] == sector]
+
+    # 기업코드, 기업명, 현재가, 전일비, 등락률, 거래량, 시가총액
+    selected_columns = ['Code', 'Name', 'Close', 'ChagesRatio', 'Volume', 'Marcap']
+    top_5_stocks = sector_stocks[selected_columns]
+
+    if name in top_5_stocks['Name'].values:
+        top_5_stocks = top_5_stocks[top_5_stocks['Name'] != name].head(5)
+    else:
+        top_5_stocks = top_5_stocks.head(5)
+
+    return top_5_stocks
+
+
 @router.get("/")
 async def read_root():
     return {"message": "Hello, World"}
+
 
 @router.get("/home")
 async def get_kospi_kosdaq_top5():
     # KOSPI, KOSDAQ, USD/KRW
     date_ranges = calculate_date_ranges()
-    print(date_ranges)
     kospi_today = get_stock_data('KS11', date_ranges["two_days_ago"], date_ranges["current_date"])
     kosdaq_today = get_stock_data('KQ11', date_ranges["two_days_ago"], date_ranges["current_date"])
     usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["two_days_ago"], date_ranges["current_date"])
@@ -154,6 +199,7 @@ async def get_market_chart(
     else:
         raise HTTPException(status_code=404, detail="Market not found")
 
+
 @router.get("/sic")
 async def get_sic():
     kospi_info = merged_df[merged_df['Market'] == 'KOSPI']
@@ -192,34 +238,6 @@ async def get_sic_select(
 async def get_company_info(
         sector: str = Path(..., description="sector: 업종명"),
         name: str = Path(..., description="name: 기업명")):
-    def get_stock_data_by_name(name):
-        name_data = merged_df_sorted_m[merged_df_sorted_m['Name'] == name]
-
-        # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가, 상장주식수
-        selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
-                            'Volume', 'Marcap', 'Stocks']
-        name_data = name_data[selected_columns]
-
-        return name_data
-
-    def get_per_pbr_for_ticker(all_fundamental, ticker):
-        per_pbr_df = all_fundamental.loc[all_fundamental.index == ticker, ['PER', 'PBR', 'EPS', 'DIV']]
-        return per_pbr_df
-
-    def get_top_5_stocks_by_sector(sector, name):
-        sector_stocks = merged_df_sorted_m[merged_df_sorted_m['Sector'] == sector]
-
-        # 기업코드, 기업명, 현재가, 전일비, 등락률, 거래량, 시가총액
-        selected_columns = ['Code', 'Name', 'Close', 'ChagesRatio', 'Volume', 'Marcap']
-        top_5_stocks = sector_stocks[selected_columns]
-
-        if name in top_5_stocks['Name'].values:
-            top_5_stocks = top_5_stocks[top_5_stocks['Name'] != name].head(5)
-        else:
-            top_5_stocks = top_5_stocks.head(5)
-
-        return top_5_stocks
-
     stock_data_selected_name = get_stock_data_by_name(name)
 
     current_date = datetime.today().strftime('%Y%m%d')
@@ -252,5 +270,53 @@ async def get_company_info(
         "top_5_stocks_info": top_5_stocks_info,
     }
 
+
+@router.post("/sic/{sector}/{name}")
+async def create_interest_stock(
+        sector: str = Path(..., description="sector: 업종명"),
+        name: str = Path(..., description="name: 기업명"),
+        user_id: int = Query(..., description="user_id: 사용자 ID")):
+
+    stock_data_selected_name = get_stock_data_by_name(name)
+    code = stock_data_selected_name['Code'].iloc[-1]
+
+    created_interest_stock = crud.create_interest_stock(code, user_id=user_id)
+
+    if created_interest_stock is None:
+        raise HTTPException(status_code=400, detail="Failed to create interest stock")
+
+    return created_interest_stock
+
+
+@router.delete("/sic/{sector}/{name}")
+async def delete_interest_stock(
+        sector: str = Path(..., description="sector: 업종명"),
+        name: str = Path(..., description="name: 기업명"),
+        user_id: int = Query(..., description="user_id: 사용자 ID")):
+
+    stock_data_selected_name = get_stock_data_by_name(name)
+    code = stock_data_selected_name['Code'].iloc[-1]
+
+    delete_interest_stock = crud.delete_interest_stock(code, user_id=user_id)
+
+    if delete_interest_stock is None:
+        raise HTTPException(status_code=404, detail="Interest stock not found")
+
+    return delete_interest_stock
+
+
+@router.get("/mypage/{user_id}")
+async def get_my_info(user_id: int):
+    interest_stocks_code = crud.get_interest_stocks(user_id)
+
+    if not interest_stocks_code:
+        raise HTTPException(status_code=404, detail="Interest stocks not found for this user")
+
+    interest_stocks = []
+    for code in interest_stocks_code:
+        stock_data = get_stock_data_by_code(code)
+        interest_stocks.append(stock_data)
+
+    return interest_stocks
 
 
