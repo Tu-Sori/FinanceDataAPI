@@ -24,6 +24,7 @@ pip install pydantic
 
 > **SQL**
 ```
+conda install mysqlclient
 pip install SQLAlchemy
 pip install mysql
 ```
