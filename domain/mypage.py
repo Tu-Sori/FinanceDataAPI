@@ -39,10 +39,14 @@ async def get_interests(
     interest_stocks = []
     for code in interest_stocks_code:
         stock_data = stockInfo.get_stock_data_by_code(code)
-        interest_stock = stock_data.to_dict(orient='records')
-        interest_stocks.append(interest_stock)
+        if not stock_data.empty:
+            stock_info_dict = stock_data.iloc[0].to_dict()
+            stock_info_dict.update(interest_stocks_code.iloc[0].to_dict())
+            interest_stocks.append(stock_info_dict)
 
-    return interest_stocks
+    return interest_stocks_code
+
+
 
 # @router.get("/{user_id}/saves", response_model=list[schemas.SaveStock])
 # async def get_saves(

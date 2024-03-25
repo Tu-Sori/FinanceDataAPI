@@ -97,7 +97,7 @@ async def create_interest_stock(
     stock_data_selected_name = stockInfo.get_stock_data_by_name(name)
     code = stock_data_selected_name['Code'].iloc[-1]
 
-    user_id = 1
+    user_id = 2
 
     existing_interest_stock = crud.get_interest_stock_by_code(db=db, code=code, user_id=user_id)
 
@@ -121,22 +121,17 @@ async def create_interest_stock(
 async def delete_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
         name: str = Path(..., description="name: 기업명"),
-        interestStock: schemas.InterestStockCreate = None,
         db: Session = Depends(get_db)):
 
     stock_data_selected_name = stockInfo.get_stock_data_by_name(name)
-    code = stock_data_selected_name['Code'].iloc[-1]
+    code = str(stock_data_selected_name['Code'].iloc[-1])
+    print(code)
 
-    user_id = 1
+    user_id = 2
 
-    if interestStock is None:
-        interestStock = schemas.InterestStockCreate(code=code)
-    else:
-        interestStock.code = code
-
-    deleted_interest_stock = crud.delete_interest_stock(db=db, interest_stock=interestStock, user_id=user_id)
+    deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)
 
     if deleted_interest_stock is None:
         raise HTTPException(status_code=404, detail="Interest stock not found")
 
-    return delete_interest_stock
+    return deleted_interest_stock

@@ -8,11 +8,11 @@ class User(BaseModel):
     nickname: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class InterestStockBase(BaseModel):
-    code: int
+    code: str
 
 class InterestStockCreate(InterestStockBase):
     pass
@@ -22,11 +22,30 @@ class InterestStock(InterestStockBase):
     user_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
+class StockRecordBase(BaseModel):
+    sell_or_buy: bool
+    code: str
+    record_date: datetime
+    order_price: int
+    contract_price: int
+    quentity: int
+    proceeds: int
+    proceeds_rate: float
+
+class StockRecordCreate(StockRecordBase):
+    pass
+
+class StockRecord(StockRecordBase):
+    stock_record_id: int
+    user_id: int
+
+    class Config:
+        orm_mode = True
 
 class SaveStockBase(BaseModel):
-    code: int
+    code: str
     purchase: float
     quantity: int
     retention_date: datetime
@@ -37,8 +56,8 @@ class SaveStockCreate(SaveStockBase):
     pass
 
 class SaveStock(SaveStockBase):
-    stock_id: int
+    stock_record_id: int
     user_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
