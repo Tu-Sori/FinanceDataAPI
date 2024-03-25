@@ -10,11 +10,10 @@ from database.database import SessionLocal, engine
 from database import models, schemas
 from database.database import get_db
 
-models.Base.metadata.create_all(bind=engine)
+
 router = APIRouter(
          prefix="/sic"
 )
-
 
 
 @router.get("/")

@@ -10,6 +10,21 @@ class User(BaseModel):
     class Config:
         from_attributes = True
 
+
+class InterestStockBase(BaseModel):
+    code: int
+
+class InterestStockCreate(InterestStockBase):
+    pass
+
+class InterestStock(InterestStockBase):
+    interest_id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
+
+
 class SaveStockBase(BaseModel):
     code: int
     purchase: float
@@ -23,19 +38,6 @@ class SaveStockCreate(SaveStockBase):
 
 class SaveStock(SaveStockBase):
     stock_id: int
-    user_id: int
-
-    class Config:
-        from_attributes = True
-
-class InterestStockBase(BaseModel):
-    code: int
-
-class InterestStockCreate(InterestStockBase):
-    pass
-
-class InterestStock(InterestStockBase):
-    interest_id: int
     user_id: int
 
     class Config:

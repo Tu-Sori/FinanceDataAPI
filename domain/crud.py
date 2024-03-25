@@ -5,15 +5,51 @@ from database import models, schemas
 from database.database import get_db
 
 
-def get_user(db: Session, user_id: int) -> User:
-    user = db.query(user).filter(user_id == user_id).all()
-
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-    return user
+# user 정보
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.user_id == user_id).first()
 
 
+# 관심 주식
+def create_interest_stock(db: Session, interest_stock: schemas.InterestStockCreate, user_id: int):
+    db_interest_stock = models.InterestStock(code=interest_stock.code, user_id=user_id)
+    db.add(db_interest_stock)
+    db.commit()
+    db.refresh(db_interest_stock)
+
+    return db_interest_stock
+
+
+def get_interest_stocks(db: Session, user_id: int):
+    interest_stocks = (db.query(models.InterestStock)
+                       .filter(models.InterestStock.user_id == user_id)
+                       .all())
+    return interest_stocks
+
+
+def get_interest_stock_by_code(db: Session, code: int, user_id: int):
+    return db.query(models.InterestStock).filter(
+        models.InterestStock.code == code,
+        models.InterestStock.user_id == user_id
+    ).first()
+
+
+def delete_interest_stock(db: Session, code: int,  user_id: int):
+    db_interest_stock = db.query(models.InterestStock).filter(
+        models.InterestStock.code == code,
+        models.InterestStock.user_id == user_id
+    ).first()
+
+    if db_interest_stock is None:
+        raise HTTPException(status_code=404, detail="InterestStock not found")
+
+    db.delete(db_interest_stock)
+    db.commit()
+
+    return db_interest_stock
+
+
+# 매수, 매도 주식
 def create_save_stock(db: Session, save_stock: schemas.SaveStockCreate, user_id: int):
     db_save_sotck = models.SaveStock(code=save_stock.code, purchase=save_stock.purchase,
                                      quantity=save_stock.quantity,
@@ -46,45 +82,4 @@ def delete_save_stock(db: Session, save_stock_id: int):
     db.commit()
 
     return db_save_stock
-
-
-def create_interest_stock(db: Session, interest_stock: schemas.InterestStockCreate, user_id: int):
-    db_interest_stock = models.InterestStock(code=interest_stock.code, user_id=user_id)
-    db.add(db_interest_stock)
-    db.commit()
-    db.refresh(db_interest_stock)
-
-    return db_interest_stock
-
-
-
-def get_interest_stocks(db: Session, user_id: int):
-    interest_stocks = db.query(models.InterestStock).filter(models.InterestStock.user_id == user_id).all()
-
-    if not interest_stocks:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="InterestStock not found")
-
-    return interest_stocks
-
-
-def get_interest_stock_by_code(db: Session, code: int, user_id: int):
-    return db.query(models.InterestStock).filter(
-        models.InterestStock.code == code,
-        models.InterestStock.user_id == user_id
-    ).first()
-
-
-def delete_interest_stock(db: Session, code: int,  user_id: int):
-    db_interest_stock = db.query(models.InterestStock).filter(
-        models.InterestStock.code == code,
-        models.InterestStock.user_id == user_id
-    ).first()
-
-    if db_interest_stock is None:
-        raise HTTPException(status_code=404, detail="InterestStock not found")
-
-    db.delete(db_interest_stock)
-    db.commit()
-
-    return db_interest_stock
 
