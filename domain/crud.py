@@ -1,11 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-import schemas
-import models
+from database.schemas import User
+from database import models, schemas
+from database.database import get_db
 
 
-def get_user(db: Session, user_id: int):
-    user = db.query(models.User).filter(models.User.user_id == user_id).first()
+def get_user(db: Session, user_id: int) -> User:
+    user = db.query(user).filter(user_id == user_id).all()
 
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -14,7 +15,11 @@ def get_user(db: Session, user_id: int):
 
 
 def create_save_stock(db: Session, save_stock: schemas.SaveStockCreate, user_id: int):
-    db_save_sotck = models.SaveStock(**save_stock.model_dump(), user_id=user_id)
+    db_save_sotck = models.SaveStock(code=save_stock.code, purchase=save_stock.purchase,
+                                     quantity=save_stock.quantity,
+                                     retention_date=save_stock.retention_date,
+                                     valuation=save_stock.valuation,
+                                     valuation_ratio=save_stock.valuation, user_id=user_id)
     db.add(db_save_sotck)
     db.commit()
     db.refresh(db_save_sotck)
@@ -44,12 +49,13 @@ def delete_save_stock(db: Session, save_stock_id: int):
 
 
 def create_interest_stock(db: Session, interest_stock: schemas.InterestStockCreate, user_id: int):
-    db_interest_stock = models.InterestStock(**interest_stock.model_dump(), user_id=user_id)
+    db_interest_stock = models.InterestStock(code=interest_stock.code, user_id=user_id)
     db.add(db_interest_stock)
     db.commit()
     db.refresh(db_interest_stock)
 
     return db_interest_stock
+
 
 
 def get_interest_stocks(db: Session, user_id: int):
@@ -61,12 +67,21 @@ def get_interest_stocks(db: Session, user_id: int):
     return interest_stocks
 
 
-def delete_interest_stock(db: Session, interest_stock_id: int):
+def get_interest_stock_by_code(db: Session, code: int, user_id: int):
+    return db.query(models.InterestStock).filter(
+        models.InterestStock.code == code,
+        models.InterestStock.user_id == user_id
+    ).first()
+
+
+def delete_interest_stock(db: Session, code: int,  user_id: int):
     db_interest_stock = db.query(models.InterestStock).filter(
-        models.InterestStock.interest_id == interest_stock_id).first()
+        models.InterestStock.code == code,
+        models.InterestStock.user_id == user_id
+    ).first()
 
     if db_interest_stock is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="InterestStock not found")
+        raise HTTPException(status_code=404, detail="InterestStock not found")
 
     db.delete(db_interest_stock)
     db.commit()

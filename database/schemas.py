@@ -4,12 +4,11 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     user_id: int
-    nickname: str
-    email: str
     assets: int
+    nickname: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SaveStockBase(BaseModel):
     code: int
@@ -27,7 +26,7 @@ class SaveStock(SaveStockBase):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class InterestStockBase(BaseModel):
     code: int
@@ -40,4 +39,4 @@ class InterestStock(InterestStockBase):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
