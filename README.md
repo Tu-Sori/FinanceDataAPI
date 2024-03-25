@@ -22,6 +22,13 @@ pip install pydantic
 
 <br />
 
+> **.env 파일 관리**
+```
+pip install python-dotenv
+```
+
+<br />
+
 > **SQL**
 ```
 conda install mysqlclient
