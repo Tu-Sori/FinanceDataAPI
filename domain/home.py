@@ -18,9 +18,9 @@ router = APIRouter(
 async def get_kospi_kosdaq_top5():
     # KOSPI, KOSDAQ, USD/KRW
     date_ranges = stockInfo.calculate_date_ranges()
-    kospi_today = stockInfo.get_stock_data('KS11', date_ranges["two_days_ago"], date_ranges["current_date"])
-    kosdaq_today = stockInfo.get_stock_data('KQ11', date_ranges["two_days_ago"], date_ranges["current_date"])
-    usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["two_days_ago"], date_ranges["current_date"])
+    kospi_today = stockInfo.get_stock_data('KS11', date_ranges["yesterday"], date_ranges["current_date"])
+    kosdaq_today = stockInfo.get_stock_data('KQ11', date_ranges["yesterday"], date_ranges["current_date"])
+    usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["yesterday"], date_ranges["current_date"])
 
     # 종가, 전일비, 등락률
     selected_columns = ['Close', 'Comp', 'Change']

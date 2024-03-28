@@ -7,18 +7,20 @@ import FinanceDataReader as fdr
 # 기간 설정
 def calculate_date_ranges():
     current_date = datetime.today()
-    yesterday = current_date - timedelta(days=1)
-
     day_of_week = current_date.weekday()
 
     if day_of_week == 0:
-        two_days_ago = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
+        yesterday = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
     elif day_of_week == 5:
-        two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
+        yesterday = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
     elif day_of_week == 6:
-        two_days_ago = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
+        yesterday = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
     else:
-        two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
+        yesterday = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
+        print(yesterday)
+
+    two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
+    print(two_days_ago)
 
     one_week_ago = (current_date - timedelta(days=9)).strftime('%Y-%m-%d')
     one_month_ago = (current_date - timedelta(days=32)).strftime('%Y-%m-%d')
