@@ -24,13 +24,19 @@ async def get_kospi_kosdaq_top5():
 
     # 종가, 전일비, 등락률
     selected_columns = ['Close', 'Comp', 'Change']
-    kospi = kospi_today[selected_columns].to_dict(orient="records")
-    kosdaq = kosdaq_today[selected_columns].to_dict(orient="records")
+    kospi = kospi_today[selected_columns].iloc[0].to_dict()
+    kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
 
     close_price = usdkrw_today['Close'][-1]
     yesterday_close = usdkrw_today['Close'][-2]
     price_change = close_price - yesterday_close
     percentage_change = (price_change / yesterday_close) * 100
+
+    usdkrw_data = {
+        "close_price": close_price,
+        "price_change": price_change,
+        "percentage_change": percentage_change
+    }
 
     # 상위 5개(기준: 거래량)
     top_5_kospi = stockInfo.get_top_n_stocks('KOSPI')
@@ -40,9 +46,7 @@ async def get_kospi_kosdaq_top5():
     return {
         "kospi": kospi,
         "kosdaq": kosdaq,
-        "close_price": close_price,
-        "price_change": price_change,
-        "percentage_change": percentage_change,
+        "usdkrw_data": usdkrw_data,
         "top_5_kospi": top_5_kospi,
         "top_5_kosdaq": top_5_kosdaq,
         "top_5_konex": top_5_konex
