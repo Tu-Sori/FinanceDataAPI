@@ -45,15 +45,48 @@ async def get_user_with_interests(
     return user_with_interests
 
 
-# @router.get("/{user_id}/saves", response_model=list[schemas.SaveStock])
-# async def get_saves(
-#         user_id: int = Path(..., description="User ID"),
-#         db: Session = Depends(get_db()):
-#
-#     save_stocs_code = crud.get_save_stock(db, user_id)
-#
-#     save_stocks = []
-#
-#
-# return save_stocks
+@router.delete("/{user_id}/{code}", response_model=schemas.InterestStock)
+async def delete_interest_stock(
+        user_id: int = Path(..., description="User ID"),
+        code: str = Path(..., description="기업코드"),
+        db: Session = Depends(get_db)):
+
+    deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)
+
+    if deleted_interest_stock is None:
+        raise HTTPException(status_code=404, detail="Interest stock not found")
+
+    return deleted_interest_stock
+
+
+@router.get("/{user_id}/saves")
+async def get_saves(
+        user_id: int = Path(..., description="User ID"),
+        db: Session = Depends(get_db)):
+
+    user = crud.get_user(db=db, user_id=user_id)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        stock_record = crud.get_stock_record(db=db, user_id=user_id)
+
+        if stock_record is None:
+            raise HTTPException(status_code=404, detail="stock_record not found")
+        else:
+            codes = [stock.code for stock in stock_record]
+            print(codes)
+
+    save_stocks = []
+    for code in codes:
+        stock_data = stockInfo.get_save_stock_data_by_code(code)
+        stock_dict = stock_data.to_dict(orient='records')
+        save_stocks.extend(stock_dict)
+
+    result = {
+        'stock_record': stock_record,
+        'save_stocks': save_stocks
+    }
+
+    return result
 

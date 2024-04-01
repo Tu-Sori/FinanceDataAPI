@@ -4,6 +4,16 @@ import pandas as pd
 import FinanceDataReader as fdr
 
 
+# KRX, KRX-DESC -> 기준: Code 병합 및 정렬
+df_krx_desc = fdr.StockListing('KRX-DESC')
+df_krx = fdr.StockListing('KRX')
+merged_df = pd.merge(df_krx, df_krx_desc[['Code', 'Sector']], on='Code', how='inner')
+merged_df.fillna({'Sector': '우선주'}, inplace=True)
+
+merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
+merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
+
+
 # 기간 설정
 def calculate_date_ranges():
     current_date = datetime.today()
@@ -51,24 +61,18 @@ def get_top_n_stocks(market, n=5):
     selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
     return df_sorted[selected_columns].head(n).to_dict(orient="records")
 
-
-# KRX, KRX-DESC -> 기준: Code 병합 및 정렬
-df_krx_desc = fdr.StockListing('KRX-DESC')
-df_krx = fdr.StockListing('KRX')
-merged_df = pd.merge(df_krx, df_krx_desc[['Code', 'Sector']], on='Code', how='inner')
-merged_df.fillna({'Sector': '우선주'}, inplace=True)
-
-merged_df_sorted = merged_df.sort_values(by='Volume', ascending=False)
-merged_df_sorted_m = merged_df.sort_values(by='Marcap', ascending=False)
-
+def get_top_n_save_stocks(code, n=5):
+    sector_data = merged_df_sorted[merged_df_sorted['Code'] == code]
+    selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
+    return sector_data[selected_columns].head(n).to_dict(orient="records")
 
 # 이름 -> 기업정보
 def get_stock_data_by_name(name):
     name_data = merged_df_sorted_m[merged_df_sorted_m['Name'] == name]
 
     # 기업코드, 분류, 기업명, 종가, 전일비, 등락률, 시가, 고가, 저가, 상장주식수
-    selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
-                        'Volume', 'Marcap', 'Stocks']
+    selected_columns = ['Code', 'Market', 'Name', 'Close', 'Changes', 'ChagesRatio',
+                        'Open', 'High', 'Low', 'Volume', 'Marcap', 'Stocks']
     name_data = name_data[selected_columns]
 
     return name_data
@@ -78,9 +82,16 @@ def get_stock_data_by_code(code):
     sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
 
     # 기업코드, 종목명, 현재가, 전일비, 등락률, 시가, 고가, 저가, 거래량, 시가총액
-    selected_colums = ['Code', 'Sector', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low',
-    'Volume', 'Marcap']
-    sector_data = sector_data[selected_colums]
+    selected_columns = ['Code', 'Name', 'Sector', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low', 'Volume', 'Marcap']
+    sector_data = sector_data[selected_columns]
+
+    return sector_data
+
+def get_save_stock_data_by_code(code):
+    sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
+
+    selected_columns = ['Code', 'Name']
+    sector_data = sector_data[selected_columns]
 
     return sector_data
 

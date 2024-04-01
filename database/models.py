@@ -31,10 +31,10 @@ class StockRecord(Base):
    stock_record_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    sell_or_buy = Column(Boolean)
    code = Column(String(6), unique=True)
+   sell_or_buy_date = Column(DateTime, default=datetime.utcnow)
    record_date = Column(DateTime, default=datetime.utcnow)
-   order_price = Column(Integer)
    contract_price = Column(Integer)
-   quentity = Column(Integer)
+   quantity = Column(Integer)
    proceeds = Column(Integer)
    proceeds_rate = Column(Float)
    user_id = Column(Integer, ForeignKey("user.user_id"))
@@ -53,7 +53,7 @@ class SaveStock(Base):
    my_quantity = Column(Integer)
    valuation = Column(Integer)
    valuation_ratio = Column(Float)
-   user_id = Column(Integer, ForeignKey("stockRecord.stock_record_id"))
+   stock_record_id = Column(Integer, ForeignKey("stockRecord.stock_record_id"))
 
    stock_record = relationship("StockRecord", back_populates="save_stock")
 

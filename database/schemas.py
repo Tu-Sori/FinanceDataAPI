@@ -5,6 +5,7 @@ from pydantic import BaseModel
 class User(BaseModel):
     user_id: int
     assets: int
+    email: int
     nickname: str
 
     class Config:
@@ -24,40 +25,33 @@ class InterestStock(InterestStockBase):
     class Config:
         orm_mode = True
 
-class StockRecordBase(BaseModel):
+
+class StockRecord(BaseModel):
+    stock_record_id: int
     sell_or_buy: bool
     code: str
+    sell_or_buy_date: datetime
     record_date: datetime
-    order_price: int
     contract_price: int
-    quentity: int
+    quantity: int
     proceeds: int
     proceeds_rate: float
-
-class StockRecordCreate(StockRecordBase):
-    pass
-
-class StockRecord(StockRecordBase):
-    stock_record_id: int
     user_id: int
 
     class Config:
         orm_mode = True
 
-class SaveStockBase(BaseModel):
+
+class SaveStock(BaseModel):
+    stock_id: int
     code: str
     purchase: int
     average_price: int
     my_quantity: int
     valuation: int
     valuation_ratio: float
-
-class SaveStockCreate(SaveStockBase):
-    pass
-
-class SaveStock(SaveStockBase):
     stock_record_id: int
-    user_id: int
 
     class Config:
         orm_mode = True
+

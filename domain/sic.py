@@ -44,7 +44,7 @@ async def get_sic_select(
     sector_data = stockInfo.merged_df_sorted_m[stockInfo.merged_df_sorted_m['Sector'] == sector]
 
     # 종목명, 현재가, 전일비, 등락률, 거래량
-    selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
+    selected_columns = ['Code', 'Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
     sector_data = sector_data[selected_columns].to_dict(orient="records")
 
     return sector_data
@@ -87,17 +87,14 @@ async def get_company_info(
     }
 
 
-@router.post("/{sector}/{name}", response_model=schemas.InterestStock)
+@router.post("/{sector}/{code}", response_model=schemas.InterestStock)
 async def create_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
-        name: str = Path(..., description="name: 기업명"),
+        code: str = Path(..., description="Stock Code"),
         interestStock: schemas.InterestStockCreate = None,
         db: Session = Depends(get_db)):
 
-    stock_data_selected_name = stockInfo.get_stock_data_by_name(name)
-    code = stock_data_selected_name['Code'].iloc[-1]
-
-    user_id = 2
+    user_id = 1
 
     existing_interest_stock = crud.get_interest_stock_by_code(db=db, code=code, user_id=user_id)
 
@@ -117,17 +114,13 @@ async def create_interest_stock(
     return created_interest_stock
 
 
-@router.delete("/sic/{sector}/{name}", response_model=schemas.InterestStock)
+@router.delete("/sic/{sector}/{code}", response_model=schemas.InterestStock)
 async def delete_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
-        name: str = Path(..., description="name: 기업명"),
+        code: str = Path(..., description="기업코드"),
         db: Session = Depends(get_db)):
 
-    stock_data_selected_name = stockInfo.get_stock_data_by_name(name)
-    code = str(stock_data_selected_name['Code'].iloc[-1])
-    print(code)
-
-    user_id = 2
+    user_id = 1
 
     deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)
 

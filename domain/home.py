@@ -3,8 +3,8 @@ from fastapi import APIRouter, Query, HTTPException, Path, Depends
 import FinanceDataReader as fdr
 import mplfinance as mpf
 
-from domain import stockInfo
-from database.database import SessionLocal, engine
+from sqlalchemy.orm import Session
+from domain import stockInfo, crud
 from database import models, schemas
 from database.database import get_db
 
@@ -51,6 +51,31 @@ async def get_kospi_kosdaq_top5():
         "top_5_kosdaq": top_5_kosdaq,
         "top_5_konex": top_5_konex
     }
+
+
+@router.get("/{user_id}")
+async def get_saves_top5(
+        user_id: int = Path(..., description="User ID"),
+        db: Session = Depends(get_db)):
+
+    user = crud.get_user(db=db, user_id=user_id)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        stock_record = crud.get_stock_record(db=db, user_id=user_id)
+
+        if stock_record is None:
+            raise HTTPException(status_code=404, detail="stock_record not found")
+        else:
+            codes = [stock.code for stock in stock_record]
+
+    save_stocks = []
+    for code in codes:
+        stock_data = stockInfo.get_top_n_save_stocks(code)
+        save_stocks.append(stock_data)
+
+    return save_stocks
 
 
 @router.get("/{market}")
