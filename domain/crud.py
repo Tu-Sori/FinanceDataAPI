@@ -17,7 +17,7 @@ def create_interest_stock(db: Session, interest_stock: schemas.InterestStockCrea
     return db_interest_stock
 
 
-def get_interest_stocks(db: Session, user_id: int):
+def get_interest_stocks_code(db: Session, user_id: int):
     interest_stocks = (db.query(models.InterestStock)
                        .filter(models.InterestStock.user_id == user_id)
                        .all())

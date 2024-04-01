@@ -15,37 +15,34 @@ router = APIRouter(
          prefix="/mypage"
 )
 
-
-@router.get("/{user_id}", response_model=schemas.User)
-async def get_my_info(
+@router.get("/{user_id}")
+async def get_user_with_interests(
         user_id: int = Path(..., description="User ID"),
         db: Session = Depends(get_db)):
 
+    # 사용자 정보 조회
     user = crud.get_user(db=db, user_id=user_id)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return user
-
-
-@router.get("/{user_id}/interests", response_model=List[schemas.InterestStock])
-async def get_interests(
-        user_id: int = Path(..., description="User ID"),
-        db: Session = Depends(get_db)):
-
-    interest_stocks_code = crud.get_interest_stocks(db=db, user_id=user_id)
+    # 관심 주식 정보 조회
+    interest_stocks_code = crud.get_interest_stocks_code(db=db, user_id=user_id)
+    codes = [stock.code for stock in interest_stocks_code]
 
     interest_stocks = []
-    for code in interest_stocks_code:
+    for code in codes:
         stock_data = stockInfo.get_stock_data_by_code(code)
-        if not stock_data.empty:
-            stock_info_dict = stock_data.iloc[0].to_dict()
-            stock_info_dict.update(interest_stocks_code.iloc[0].to_dict())
-            interest_stocks.append(stock_info_dict)
+        stock_dict = stock_data.to_dict(orient='records')
+        interest_stocks.extend(stock_dict)
 
-    return interest_stocks_code
+    # 사용자 정보와 관심 주식 정보를 합쳐서 반환
+    user_with_interests = {
+        "user_info": user,
+        "interests": interest_stocks
+    }
 
+    return user_with_interests
 
 
 # @router.get("/{user_id}/saves", response_model=list[schemas.SaveStock])

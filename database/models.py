@@ -48,10 +48,10 @@ class SaveStock(Base):
 
    stock_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    code = Column(String(6), unique=True)
-   purchase = Column(Float)
-   quantity = Column(Integer)
-   retention_date = Column(DateTime, default=datetime.utcnow)
-   valuation = Column(Float)
+   purchase = Column(Integer)
+   average_price = Column(Integer)
+   my_quantity = Column(Integer)
+   valuation = Column(Integer)
    valuation_ratio = Column(Float)
    user_id = Column(Integer, ForeignKey("stockRecord.stock_record_id"))
 

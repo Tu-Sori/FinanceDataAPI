@@ -46,10 +46,10 @@ class StockRecord(StockRecordBase):
 
 class SaveStockBase(BaseModel):
     code: str
-    purchase: float
-    quantity: int
-    retention_date: datetime
-    valuation: float
+    purchase: int
+    average_price: int
+    my_quantity: int
+    valuation: int
     valuation_ratio: float
 
 class SaveStockCreate(SaveStockBase):
