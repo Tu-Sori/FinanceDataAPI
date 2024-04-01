@@ -54,7 +54,7 @@ def get_stock_record(db: Session, user_id: int):
 
 
 # 보유주식
-def get_save_stocks_code(db: Session, stock_record_id: int):
+def get_save_stocks(db: Session, stock_record_id: int):
     save_stocks = (db.query(models.SaveStock)
                    .filter(models.SaveStock.stock_record_id == stock_record_id)
                    .all())

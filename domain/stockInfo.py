@@ -87,10 +87,18 @@ def get_stock_data_by_code(code):
 
     return sector_data
 
-def get_save_stock_data_by_code(code):
+def get_record_stock_data_by_code(code):
     sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
 
     selected_columns = ['Code', 'Name']
+    sector_data = sector_data[selected_columns]
+
+    return sector_data
+
+def get_save_stock_data_by_code(code):
+    sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
+
+    selected_columns = ['Code', 'Name', 'Close']
     sector_data = sector_data[selected_columns]
 
     return sector_data
