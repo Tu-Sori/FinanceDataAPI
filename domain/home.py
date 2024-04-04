@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def get_kospi_kosdaq_top5():
     # KOSPI, KOSDAQ, USD/KRW
     date_ranges = stockInfo.calculate_date_ranges()

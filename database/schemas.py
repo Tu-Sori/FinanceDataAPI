@@ -48,8 +48,6 @@ class SaveStock(BaseModel):
     purchase: int
     average_price: int
     my_quantity: int
-    valuation: int
-    valuation_ratio: float
     stock_record_id: int
 
     class Config:

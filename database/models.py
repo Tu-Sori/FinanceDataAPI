@@ -6,10 +6,11 @@ from .database import Base
 class User(Base):
    __tablename__ = 'user'
 
+   # 사용자 id(PK), 닉네임, 이메일, 가용자산
    user_id = Column(Integer, primary_key=True, index=True)
-   assets = Column(Integer, default=10000000)
    email = Column(Integer, unique=True, index=True)
    nickname = Column(String, index=True)
+   assets = Column(Integer, default=10000000)
 
    interest_stocks = relationship("InterestStock", back_populates="user")
    stock_record = relationship("StockRecord", back_populates="user")
@@ -18,6 +19,7 @@ class User(Base):
 class InterestStock(Base):
    __tablename__ = "interestStock"
 
+   # 관심주식 id(PK), 기업 코드, 사용자 id(FK)
    interest_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    code = Column(String(6), unique=True)
    user_id = Column(Integer, ForeignKey("user.user_id"))
@@ -28,6 +30,8 @@ class InterestStock(Base):
 class StockRecord(Base):
    __tablename__ = "stockRecord"
 
+   # 매수매도 일지 id(PK), 매수매도 구분, 기업 코드, 매수매도 일자,
+   # 체결일자, 체결단가, 주문수량, 수익금, 수익률, 사용자 id(FK)
    stock_record_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    sell_or_buy = Column(Boolean)
    code = Column(String(6), unique=True)
@@ -46,13 +50,12 @@ class StockRecord(Base):
 class SaveStock(Base):
    __tablename__ = "saveStock"
 
+   # 보유주식 id(PK), 기업 코드, 매입가, 평단가, 보유수량, 매수매도 일지 id(FK)
    stock_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    code = Column(String(6), unique=True)
    purchase = Column(Integer)
    average_price = Column(Integer)
    my_quantity = Column(Integer)
-   valuation = Column(Integer)
-   valuation_ratio = Column(Float)
    stock_record_id = Column(Integer, ForeignKey("stockRecord.stock_record_id"))
 
    stock_record = relationship("StockRecord", back_populates="save_stock")

@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def get_sic():
     kospi_info = stockInfo.merged_df[stockInfo.merged_df['Market'] == 'KOSPI']
     kosdaq_info = stockInfo.merged_df[stockInfo.merged_df['Market'] == 'KOSDAQ']
