@@ -3,13 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from domain import home, sic, mypage
 from database.database import engine
 from database import models
+import os
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+elastic_ip = os.getenv("ELASTIC_IP")
+
 origins = [
     "http://localhost:3000",
+    f"http://{elastic_ip}"
 ]
 
 app.add_middleware(
