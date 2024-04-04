@@ -31,8 +31,8 @@ async def get_user_info(
 
     # 거래 기록 정보
     stock_records = crud.get_stock_record(db=db, user_id=user_id)
-    if not stock_records:
-        raise HTTPException(status_code=404, detail="Stock records not found")
+    # if not stock_records:
+    #     raise HTTPException(status_code=404, detail="Stock records not found")
 
     # 기업 코드, 종목명
     # (DB) 매수일자, 체결일자, 주문수량, 수익금, 수익률
