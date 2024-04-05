@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException, Path, Depends
 
+import pandas as pd
 import FinanceDataReader as fdr
 import mplfinance as mpf
 
@@ -22,15 +23,23 @@ async def get_kospi_kosdaq_top5():
     kosdaq_today = stockInfo.get_stock_data('KQ11', date_ranges["yesterday"], date_ranges["current_date"])
     usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["yesterday"], date_ranges["current_date"])
 
+    print(kospi_today)
+    print(usdkrw_today)
+
     # 종가, 전일비, 등락률
     selected_columns = ['Close', 'Comp', 'Change']
     kospi = kospi_today[selected_columns].iloc[0].to_dict()
     kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
 
-    close_price = usdkrw_today['Close'][-1]
-    yesterday_close = usdkrw_today['Close'][-2]
-    price_change = close_price - yesterday_close
-    percentage_change = (price_change / yesterday_close) * 100
+    close_price = usdkrw_today['Close'].iloc[-1]
+    yesterday_close = usdkrw_today['Close'].iloc[-2]
+
+    if pd.isna(yesterday_close):
+        price_change = '업데이트 중'
+        percentage_change = '업데이트 중'
+    else:
+        price_change = close_price - yesterday_close
+        percentage_change = (price_change / yesterday_close) * 100
 
     usdkrw_data = {
         "close_price": close_price,

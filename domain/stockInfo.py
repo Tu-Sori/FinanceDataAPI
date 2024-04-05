@@ -19,15 +19,16 @@ def calculate_date_ranges():
     current_date = datetime.today()
     day_of_week = current_date.weekday()
 
-    if day_of_week == 0:
+    # 주식거래(월 ~ 금)
+    if day_of_week == 0: # 월요일 -> 금요일
         yesterday = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
-    elif day_of_week == 5:
-        yesterday = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
-    elif day_of_week == 6:
+    elif day_of_week == 5: # 토요일 -> 금요일
         yesterday = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
+    elif day_of_week == 6: # 일요일 -> 금요일
+        yesterday = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
     else:
         yesterday = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
-        print(yesterday)
+    print(yesterday)
 
     two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
     print(two_days_ago)
@@ -38,6 +39,7 @@ def calculate_date_ranges():
     one_year_ago = (current_date - timedelta(days=367)).strftime('%Y-%m-%d')
     three_years_ago = (current_date - timedelta(days=3*365+2)).strftime('%Y-%m-%d')
     ten_years_ago = (current_date - timedelta(days=10*365+2)).strftime('%Y-%m-%d')
+
     return {
         "current_date": current_date,
         "yesterday": yesterday,
