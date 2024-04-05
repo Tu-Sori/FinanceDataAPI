@@ -13,6 +13,7 @@ router = APIRouter(
          prefix="/home"
 )
 
+
 @router.get("")
 async def get_data(user_id: int = None, db: Session = Depends(get_db)):
     market_data = stockInfo.get_market_data()

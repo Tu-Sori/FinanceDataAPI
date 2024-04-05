@@ -82,12 +82,12 @@ def get_market_data():
     kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
 
     close_price = usdkrw_today['Close'].iloc[-1]
-    yesterday_close = usdkrw_today['Close'].iloc[-2]
 
-    if pd.isna(yesterday_close):
+    if pd.isna(usdkrw_today['Close'].iloc[-2]):
         price_change = '업데이트 중'
         percentage_change = '업데이트 중'
     else:
+        yesterday_close = usdkrw_today['Close'].iloc[-2]
         price_change = close_price - yesterday_close
         percentage_change = (price_change / yesterday_close) * 100
 
@@ -120,7 +120,8 @@ def get_stock_data_by_code(code):
     sector_data = merged_df_sorted_m[merged_df_sorted_m['Code'] == code]
 
     # 기업코드, 종목명, 현재가, 전일비, 등락률, 시가, 고가, 저가, 거래량, 시가총액
-    selected_columns = ['Code', 'Name', 'Sector', 'Close', 'Changes', 'ChagesRatio', 'Open', 'High', 'Low', 'Volume', 'Marcap']
+    selected_columns = ['Code', 'Name', 'Sector', 'Close', 'Changes', 'ChagesRatio',
+                        'Open', 'High', 'Low', 'Volume', 'Marcap']
     sector_data = sector_data[selected_columns]
 
     return sector_data
@@ -140,6 +141,7 @@ def get_save_stock_data_by_code(code):
     sector_data = sector_data[selected_columns]
 
     return sector_data
+
 
 # 'PER', 'PBR', 'EPS', 'DIV'
 def get_per_pbr_for_ticker(all_fundamental, ticker):
