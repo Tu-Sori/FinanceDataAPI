@@ -81,13 +81,13 @@ def get_market_data():
     kospi = kospi_today[selected_columns].iloc[0].to_dict()
     kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
 
-    close_price = usdkrw_today['Close'].iloc[-1]
+    close_price = usdkrw_today['Close'][-1]
 
-    if pd.isna(usdkrw_today['Close'].iloc[-2]):
+    if pd.isna(usdkrw_today['Close'][-2]):
         price_change = '업데이트 중'
         percentage_change = '업데이트 중'
     else:
-        yesterday_close = usdkrw_today['Close'].iloc[-2]
+        yesterday_close = usdkrw_today['Close'][-2]
         price_change = close_price - yesterday_close
         percentage_change = (price_change / yesterday_close) * 100
 
