@@ -28,11 +28,8 @@ def calculate_date_ranges():
         yesterday = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
     else:
         yesterday = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
-    print(yesterday)
 
     two_days_ago = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
-    print(two_days_ago)
-
     one_week_ago = (current_date - timedelta(days=9)).strftime('%Y-%m-%d')
     one_month_ago = (current_date - timedelta(days=32)).strftime('%Y-%m-%d')
     three_months_ago = (current_date - timedelta(days=3*30+2)).strftime('%Y-%m-%d')
@@ -52,21 +49,60 @@ def calculate_date_ranges():
         "ten_years_ago": ten_years_ago
     }
 
-# KOSPI, KOSDAQ
+# FinanceDataReader로부터 읽어오기
 def get_stock_data(stock_code, start_date, end_date):
     return fdr.DataReader(stock_code, start_date, end_date)
 
-# 종목 리스트 5개
+# 상위 주식 5개
 def get_top_n_stocks(market, n=5):
     df = fdr.StockListing(market)
+    # 기준: 거래량 / 종목명, 현재가, 전일비, 등락률, 거래량
     df_sorted = df.sort_values(by='Volume', ascending=False)
     selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
     return df_sorted[selected_columns].head(n).to_dict(orient="records")
 
+# 보유 주식 5개
 def get_top_n_save_stocks(code, n=5):
     sector_data = merged_df_sorted[merged_df_sorted['Code'] == code]
+    # 기준: 거래량 / 종목명, 현재가, 전일비, 등락률, 거래량
+    df_sorted = sector_data.sort_values(by='Volume', ascending=False)
     selected_columns = ['Name', 'Close', 'Changes', 'ChagesRatio', 'Volume']
-    return sector_data[selected_columns].head(n).to_dict(orient="records")
+    return df_sorted[selected_columns].head(n).to_dict(orient="records")
+
+# 코스피, 코스닥, 환율
+# 기준: 오늘, 어제 / 종가, 전일비, 등락률
+def get_market_data():
+    date_ranges = calculate_date_ranges()
+    kospi_today = get_stock_data('KS11', date_ranges["yesterday"], date_ranges["current_date"])
+    kosdaq_today = get_stock_data('KQ11', date_ranges["yesterday"], date_ranges["current_date"])
+    usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["yesterday"], date_ranges["current_date"])
+
+    selected_columns = ['Close', 'Comp', 'Change']
+    kospi = kospi_today[selected_columns].iloc[0].to_dict()
+    kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
+
+    close_price = usdkrw_today['Close'].iloc[-1]
+    yesterday_close = usdkrw_today['Close'].iloc[-2]
+
+    if pd.isna(yesterday_close):
+        price_change = '업데이트 중'
+        percentage_change = '업데이트 중'
+    else:
+        price_change = close_price - yesterday_close
+        percentage_change = (price_change / yesterday_close) * 100
+
+    usdkrw_data = {
+        "close_price": close_price,
+        "price_change": price_change,
+        "percentage_change": percentage_change
+    }
+
+    return {
+        "kospi": kospi,
+        "kosdaq": kosdaq,
+        "usdkrw_data": usdkrw_data
+    }
+
 
 # 이름 -> 기업정보
 def get_stock_data_by_name(name):

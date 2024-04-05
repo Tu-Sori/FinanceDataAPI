@@ -21,7 +21,7 @@ class InterestStock(Base):
 
    # 관심주식 id(PK), 기업 코드, 사용자 id(FK)
    interest_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-   code = Column(String(6), unique=True)
+   code = Column(String(6))
    user_id = Column(Integer, ForeignKey("user.user_id"))
 
    user = relationship("User", back_populates="interest_stocks")
@@ -34,7 +34,7 @@ class StockRecord(Base):
    # 체결일자, 체결단가, 주문수량, 수익금, 수익률, 사용자 id(FK)
    stock_record_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
    sell_or_buy = Column(Boolean)
-   code = Column(String(6), unique=True)
+   code = Column(String(6))
    sell_or_buy_date = Column(DateTime, default=datetime.utcnow)
    record_date = Column(DateTime, default=datetime.utcnow)
    contract_price = Column(Integer)
@@ -52,7 +52,7 @@ class SaveStock(Base):
 
    # 보유주식 id(PK), 기업 코드, 매입가, 평단가, 보유수량, 매수매도 일지 id(FK)
    stock_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-   code = Column(String(6), unique=True)
+   code = Column(String(6))
    purchase = Column(Integer)
    average_price = Column(Integer)
    my_quantity = Column(Integer)

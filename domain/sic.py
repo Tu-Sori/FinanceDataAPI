@@ -90,14 +90,19 @@ async def get_company_info(
 @router.post("/{sector}/{code}", response_model=schemas.InterestStock)
 async def create_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
+        user_id: int = None,
         code: str = Path(..., description="Stock Code"),
         interestStock: schemas.InterestStockCreate = None,
         db: Session = Depends(get_db)):
 
-    user_id = 1
+    if user_id is None:
+        raise HTTPException(status_code=400, detail="User ID is required")
+
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     existing_interest_stock = crud.get_interest_stock_by_code(db=db, code=code, user_id=user_id)
-
     if existing_interest_stock:
         raise HTTPException(status_code=400, detail="Interest stock with this code already exists")
 
@@ -107,20 +112,21 @@ async def create_interest_stock(
         interestStock.code = code
 
     created_interest_stock = crud.create_interest_stock(db=db, interest_stock=interestStock, user_id=user_id)
-
     if created_interest_stock is None:
         raise HTTPException(status_code=400, detail="Failed to create interest stock")
 
     return created_interest_stock
 
 
-@router.delete("/sic/{sector}/{code}", response_model=schemas.InterestStock)
+@router.delete("/{sector}/{code}", response_model=schemas.InterestStock)
 async def delete_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
         code: str = Path(..., description="기업코드"),
+        user_id: int = None,
         db: Session = Depends(get_db)):
 
-    user_id = 1
+    if user_id is None:
+        raise HTTPException(status_code=400, detail="User ID is required")
 
     deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)
 

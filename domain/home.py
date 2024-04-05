@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Path, Depends
+from fastapi import APIRouter, Query, HTTPException, Path, Depends, Header
 
 import pandas as pd
 import FinanceDataReader as fdr
@@ -9,84 +9,52 @@ from domain import stockInfo, crud
 from database import models, schemas
 from database.database import get_db
 
-
 router = APIRouter(
          prefix="/home"
 )
 
-
 @router.get("")
-async def get_kospi_kosdaq_top5():
-    # KOSPI, KOSDAQ, USD/KRW
-    date_ranges = stockInfo.calculate_date_ranges()
-    kospi_today = stockInfo.get_stock_data('KS11', date_ranges["yesterday"], date_ranges["current_date"])
-    kosdaq_today = stockInfo.get_stock_data('KQ11', date_ranges["yesterday"], date_ranges["current_date"])
-    usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["yesterday"], date_ranges["current_date"])
-
-    print(kospi_today)
-    print(usdkrw_today)
-
-    # 종가, 전일비, 등락률
-    selected_columns = ['Close', 'Comp', 'Change']
-    kospi = kospi_today[selected_columns].iloc[0].to_dict()
-    kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
-
-    close_price = usdkrw_today['Close'].iloc[-1]
-    yesterday_close = usdkrw_today['Close'].iloc[-2]
-
-    if pd.isna(yesterday_close):
-        price_change = '업데이트 중'
-        percentage_change = '업데이트 중'
-    else:
-        price_change = close_price - yesterday_close
-        percentage_change = (price_change / yesterday_close) * 100
-
-    usdkrw_data = {
-        "close_price": close_price,
-        "price_change": price_change,
-        "percentage_change": percentage_change
-    }
-
+async def get_data(user_id: int = None, db: Session = Depends(get_db)):
+    market_data = stockInfo.get_market_data()
     # 상위 5개(기준: 거래량)
     top_5_kospi = stockInfo.get_top_n_stocks('KOSPI')
     top_5_kosdaq = stockInfo.get_top_n_stocks('KOSDAQ')
     top_5_konex = stockInfo.get_top_n_stocks('KONEX')
 
-    return {
-        "kospi": kospi,
-        "kosdaq": kosdaq,
-        "usdkrw_data": usdkrw_data,
-        "top_5_kospi": top_5_kospi,
-        "top_5_kosdaq": top_5_kosdaq,
-        "top_5_konex": top_5_konex
-    }
+    if user_id is not None:
+        user = crud.get_user(db=db, user_id=user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
 
+        stock_record = crud.get_stock_record(db=db, user_id=user_id)
+        if stock_record is None:
+            raise HTTPException(status_code=404, detail="stock_record not found")
 
-@router.get("/{user_id}")
-async def get_saves_top5(
-        user_id: int = Path(..., description="User ID"),
-        db: Session = Depends(get_db)):
-    user = crud.get_user(db=db, user_id=user_id)
+        codes = [stock.code for stock in stock_record]
+        save_stocks = []
+        for code in codes:
+            stock_data = stockInfo.get_top_n_save_stocks(code)
+            save_stocks.append(stock_data)
 
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        user_data = {
+            "user": user,
+            "save_stocks": save_stocks
+        }
 
-    stock_record = crud.get_stock_record(db=db, user_id=user_id)
-
-    if stock_record is None:
-        raise HTTPException(status_code=404, detail="stock_record not found")
-
-    codes = [stock.code for stock in stock_record]
-
-    save_stocks = []
-    for code in codes:
-        stock_data = stockInfo.get_top_n_save_stocks(code)
-        save_stocks.append(stock_data)
-
-    data = {
-        "user": user,
-        "save_stocks": save_stocks
-    }
+        data = {
+            **market_data,
+            "user_data": user_data,
+            "top_5_kospi": top_5_kospi,
+            "top_5_kosdaq": top_5_kosdaq,
+            "top_5_konex": top_5_konex
+        }
+    else:
+        data = {
+            **market_data,
+            "top_5_kospi": top_5_kospi,
+            "top_5_kosdaq": top_5_kosdaq,
+            "top_5_konex": top_5_konex
+        }
 
     return data
 
