@@ -78,18 +78,25 @@ def get_market_data():
     usdkrw_today = fdr.DataReader('USD/KRW', date_ranges["yesterday"], date_ranges["current_date"])
 
     selected_columns = ['Close', 'Comp', 'Change']
-    kospi = kospi_today[selected_columns].iloc[0].to_dict()
-    kosdaq = kosdaq_today[selected_columns].iloc[0].to_dict()
+    kospi = kospi_today[selected_columns].iloc[-1].to_dict()
+    kosdaq = kosdaq_today[selected_columns].iloc[-1].to_dict()
 
+    print(kospi_today)
+    print(kospi)
+
+    usdkrw_today.fillna(0, inplace=True)
     close_price = usdkrw_today['Close'][-1]
+    yesterday_close = usdkrw_today['Close'][0]
+    print(usdkrw_today)
 
-    if pd.isna(usdkrw_today['Close'][-2]):
+    if yesterday_close == 0:
         price_change = '업데이트 중'
         percentage_change = '업데이트 중'
     else:
-        yesterday_close = usdkrw_today['Close'][-2]
         price_change = close_price - yesterday_close
         percentage_change = (price_change / yesterday_close) * 100
+
+    print(yesterday_close)
 
     usdkrw_data = {
         "close_price": close_price,
