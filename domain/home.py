@@ -6,8 +6,8 @@ import mplfinance as mpf
 
 from sqlalchemy.orm import Session
 from domain import stockInfo, crud
-from database import models, schemas
 from database.database import get_db
+from oauth import validation_token
 
 
 router = APIRouter(
@@ -16,7 +16,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_data(user_id: int = None, db: Session = Depends(get_db)):
+async def get_data(user_id: int = Depends(validation_token), db: Session = Depends(get_db)):
     market_data = stockInfo.get_market_data()
     # 상위 5개(기준: 거래량)
     top_5_kospi = stockInfo.get_top_n_stocks('KOSPI')

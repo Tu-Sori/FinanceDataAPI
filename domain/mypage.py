@@ -5,6 +5,7 @@ from domain import stockInfo, crud
 from database.database import engine
 from database import models, schemas
 from database.database import get_db
+from oauth import validation_token
 
 from datetime import datetime
 
@@ -15,7 +16,7 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 async def get_user_info(
-        user_id: int = Path(..., description="User ID"),
+        user_id: int = Depends(validation_token),
         db: Session = Depends(get_db)):
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
@@ -92,7 +93,7 @@ async def get_user_info(
 
 @router.delete("/{user_id}/{code}", response_model=schemas.InterestStock)
 async def delete_interest_stock(
-        user_id: int = Path(..., description="User ID"),
+        user_id: int = Depends(validation_token),
         code: str = Path(..., description="기업코드"),
         db: Session = Depends(get_db)):
     deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)

@@ -6,9 +6,10 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from domain import stockInfo, crud
-from database.database import SessionLocal, engine
-from database import models, schemas
+from database import schemas
 from database.database import get_db
+from oauth import validation_token
+
 
 
 router = APIRouter(
@@ -90,7 +91,7 @@ async def get_company_info(
 @router.post("/{sector}/{code}", response_model=schemas.InterestStock)
 async def create_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
-        user_id: int = None,
+        user_id: int = Depends(validation_token),
         code: str = Path(..., description="기업코드"),
         interestStock: schemas.InterestStockCreate = None,
         db: Session = Depends(get_db)):
@@ -122,7 +123,7 @@ async def create_interest_stock(
 async def delete_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
         code: str = Path(..., description="기업코드"),
-        user_id: int = None,
+        user_id: int = Depends(validation_token),
         db: Session = Depends(get_db)):
 
     if user_id is None:
