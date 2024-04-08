@@ -91,7 +91,7 @@ async def get_company_info(
 async def create_interest_stock(
         sector: str = Path(..., description="sector: 업종명"),
         user_id: int = None,
-        code: str = Path(..., description="Stock Code"),
+        code: str = Path(..., description="기업코드"),
         interestStock: schemas.InterestStockCreate = None,
         db: Session = Depends(get_db)):
 

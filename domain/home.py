@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Path, Depends, Header
+from fastapi import APIRouter, Query, HTTPException, Path, Depends
 
 import pandas as pd
 import FinanceDataReader as fdr
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from domain import stockInfo, crud
 from database import models, schemas
 from database.database import get_db
+
 
 router = APIRouter(
          prefix="/home"

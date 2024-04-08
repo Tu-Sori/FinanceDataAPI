@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from domain import home, sic, mypage
 from database.database import engine
 from database import models
 import os
+import oauth
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -24,9 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(home.router)
-app.include_router(sic.router)
-app.include_router(mypage.router)
+app.include_router(oauth.router)
+# app.include_router(home.router)
+# app.include_router(sic.router)
+# app.include_router(mypage.router)
+
 
 if __name__ == "__main__":
     import uvicorn
