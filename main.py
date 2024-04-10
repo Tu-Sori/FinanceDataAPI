@@ -26,9 +26,9 @@ app.add_middleware(
 )
 
 app.include_router(oauth.router)
-# app.include_router(home.router)
-# app.include_router(sic.router)
-# app.include_router(mypage.router)
+app.include_router(home.router)
+app.include_router(sic.router)
+app.include_router(mypage.router)
 
 
 if __name__ == "__main__":

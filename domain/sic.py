@@ -4,12 +4,10 @@ from pykrx import stock
 from datetime import datetime
 
 from sqlalchemy.orm import Session
-
 from domain import stockInfo, crud
 from database import schemas
 from database.database import get_db
 from oauth import validation_token
-
 
 
 router = APIRouter(

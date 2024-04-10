@@ -2,19 +2,19 @@ from fastapi import APIRouter, Path, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 from domain import stockInfo, crud
-from database.database import engine
-from database import models, schemas
+from database import schemas
 from database.database import get_db
 from oauth import validation_token
 
 from datetime import datetime
+
 
 router = APIRouter(
          prefix="/mypage"
 )
 
 
-@router.get("/{user_id}")
+@router.get("")
 async def get_user_info(
         user_id: int = Depends(validation_token),
         db: Session = Depends(get_db)):
@@ -32,8 +32,6 @@ async def get_user_info(
 
     # 거래 기록 정보
     stock_records = crud.get_stock_record(db=db, user_id=user_id)
-    # if not stock_records:
-    #     raise HTTPException(status_code=404, detail="Stock records not found")
 
     # 기업 코드, 종목명
     # (DB) 매수일자, 체결일자, 주문수량, 수익금, 수익률
@@ -54,11 +52,11 @@ async def get_user_info(
     } for record in stock_records if record.sell_or_buy]
 
     save_stocks = []
-    for stock_record in sell_stock_records:
-        save_stock = crud.get_save_stocks(db=db, stock_record_id=stock_record["stock_record_id"])
-        if not save_stock:
-            raise HTTPException(status_code=404, detail="Save stocks not found")
-        save_stocks.extend(save_stock)
+    if sell_stock_records:
+        for stock_record in sell_stock_records:
+            save_stock = crud.get_save_stocks(db=db, stock_record_id=stock_record["stock_record_id"])
+            if save_stock:
+                save_stocks.extend(save_stock)
 
     # 기업코드, 종목명, 현재가, 평가손익금, 평가손익률, 보유일(체결일자 기준)
     # (DB) 매입가, 평단가, 보유수량
@@ -85,13 +83,13 @@ async def get_user_info(
 
     return {
         'user_info': user,
-        'interest_stocks': interest_stocks,
-        'stock_records': records,
-        'save_stocks': saves
+        'interest_stocks': interest_stocks if interest_stocks else None,
+        'stock_records': records if records else None,
+        'save_stocks': saves if saves else None
     }
 
 
-@router.delete("/{user_id}/{code}", response_model=schemas.InterestStock)
+@router.delete("/{code}" , response_model=schemas.InterestStock)
 async def delete_interest_stock(
         user_id: int = Depends(validation_token),
         code: str = Path(..., description="기업코드"),
