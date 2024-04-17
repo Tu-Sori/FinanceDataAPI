@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Query, HTTPException, Path, Depends
 
 import pandas as pd
@@ -16,7 +18,8 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_data(user_id: int = Depends(validation_token), db: Session = Depends(get_db)):
+async def get_data(user_id: int = Depends(validation_token),
+                   db: Session = Depends(get_db)):
     market_data = stockInfo.get_market_data()
     # 상위 5개(기준: 거래량)
     top_5_kospi = stockInfo.get_top_n_stocks('KOSPI')
@@ -62,9 +65,8 @@ async def get_data(user_id: int = Depends(validation_token), db: Session = Depen
 
 
 @router.get("/{market}")
-async def get_market_chart(
-    market: str = Path(..., description="Market: kospi, kosdaq"),
-    chart_type: str = Query(..., description="Chart type: weekly, monthly, 3months, 1years, 3years, 10years")):
+async def get_market_chart(market: str = Path(..., description="Market: kospi, kosdaq"),
+                           chart_type: str = Query(..., description="Chart type: weekly, monthly, 3months, 1years, 3years, 10years")):
     date_ranges = stockInfo.calculate_date_ranges()
 
     market_data = None

@@ -1,12 +1,14 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class TokenData(BaseModel):
     user_id: int
+
 
 class User(BaseModel):
     user_id: int
@@ -59,3 +61,12 @@ class SaveStock(BaseModel):
     class Config:
         orm_mode = True
 
+
+class Notification(BaseModel):
+    notification_id: int
+    content: str
+    createdAt: datetime
+    isRead: bool
+
+    class Config:
+        orm_mode = True

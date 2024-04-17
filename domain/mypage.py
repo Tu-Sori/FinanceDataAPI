@@ -15,9 +15,8 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_user_info(
-        user_id: int = Depends(validation_token),
-        db: Session = Depends(get_db)):
+async def get_user_info(user_id: int = Depends(validation_token),
+                        db: Session = Depends(get_db)):
     user = crud.get_user(db=db, user_id=user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -89,11 +88,10 @@ async def get_user_info(
     }
 
 
-@router.delete("/{code}" , response_model=schemas.InterestStock)
-async def delete_interest_stock(
-        user_id: int = Depends(validation_token),
-        code: str = Path(..., description="기업코드"),
-        db: Session = Depends(get_db)):
+@router.delete("/{code}", response_model=schemas.InterestStock)
+async def delete_interest_stock(user_id: int = Depends(validation_token),
+                                code: str = Path(..., description="기업코드"),
+                                db: Session = Depends(get_db)):
     deleted_interest_stock = crud.delete_interest_stock(db=db, code=code, user_id=user_id)
 
     if deleted_interest_stock is None:

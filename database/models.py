@@ -14,6 +14,7 @@ class User(Base):
 
    interest_stocks = relationship("InterestStock", back_populates="user")
    stock_record = relationship("StockRecord", back_populates="user")
+   notification = relationship("Notification", back_populates="user")
 
 
 class InterestStock(Base):
@@ -61,6 +62,13 @@ class SaveStock(Base):
    stock_record = relationship("StockRecord", back_populates="save_stock")
 
 
+class Notificatoin(Base):
+   __tablename__ = "notification"
 
+   notification_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+   content = Column(String(30))
+   createdAt = Column(DateTime, default=datetime.utcnow())
+   isRead = Column(Boolean)
 
+   user = relationship("User", back_populates="notification")
 

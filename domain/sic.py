@@ -87,12 +87,11 @@ async def get_company_info(
 
 
 @router.post("/{sector}/{code}", response_model=schemas.InterestStock)
-async def create_interest_stock(
-        sector: str = Path(..., description="sector: 업종명"),
-        user_id: int = Depends(validation_token),
-        code: str = Path(..., description="기업코드"),
-        interestStock: schemas.InterestStockCreate = None,
-        db: Session = Depends(get_db)):
+async def create_interest_stock(sector: str = Path(..., description="sector: 업종명"),
+                                user_id: int = Depends(validation_token),
+                                code: str = Path(..., description="기업코드"),
+                                interestStock: schemas.InterestStockCreate = None,
+                                db: Session = Depends(get_db)):
 
     if user_id is None:
         raise HTTPException(status_code=400, detail="User ID is required")
@@ -118,11 +117,10 @@ async def create_interest_stock(
 
 
 @router.delete("/{sector}/{code}", response_model=schemas.InterestStock)
-async def delete_interest_stock(
-        sector: str = Path(..., description="sector: 업종명"),
-        code: str = Path(..., description="기업코드"),
-        user_id: int = Depends(validation_token),
-        db: Session = Depends(get_db)):
+async def delete_interest_stock(sector: str = Path(..., description="sector: 업종명"),
+                                code: str = Path(..., description="기업코드"),
+                                user_id: int = Depends(validation_token),
+                                db: Session = Depends(get_db)):
 
     if user_id is None:
         raise HTTPException(status_code=400, detail="User ID is required")
