@@ -14,7 +14,7 @@ class User(Base):
 
    interest_stocks = relationship("InterestStock", back_populates="user")
    stock_record = relationship("StockRecord", back_populates="user")
-   notification = relationship("notification", back_populates="user")
+   notification = relationship("Notification", back_populates="user")
 
 
 class InterestStock(Base):
