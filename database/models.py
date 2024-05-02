@@ -69,7 +69,7 @@ class Notification(Base):
    content = Column(String(30))
    createdAt = Column(DateTime, default=datetime.utcnow())
    isRead = Column(Boolean)
-   
+   user_id = Column(Integer, ForeignKey("user.user_id"))
 
    user = relationship("User", back_populates="notification")
 
