@@ -64,6 +64,8 @@ async def get_company_info(
     combined_result = stock_data_selected_name.iloc[0].to_dict()
     combined_result.update(per_pbr_df.iloc[0].to_dict())
 
+    company_content = stockInfo.get_company_content(ticker)
+
     # 주식 데이터 가져오기
     # date_ranges = calculate_date_ranges()
     # df_name = fdr.DataReader(ticker, date_ranges["one_month_ago"])
@@ -79,9 +81,12 @@ async def get_company_info(
 
         top_5_stocks_info.append(combined_result2)
 
+
+
     return {
         "sector": sector,
         "company_info": combined_result,
+        "company_content": company_content,
         "top_5_stocks_info": top_5_stocks_info,
     }
 

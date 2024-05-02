@@ -6,6 +6,14 @@ import FinanceDataReader as fdr
 
 # KRX, KRX-DESC -> 기준: Code 병합 및 정렬
 df_krx_desc = fdr.StockListing('KRX-DESC')
+
+# 기업 정보
+def get_company_content(code):
+    company = df_krx_desc[df_krx_desc['Code'] == code]
+    # 산업, 성장일, 정산월, 대표자, 홈페이지, 지역
+    selected_columns = ['Industry', 'ListingDate', 'SettleMonth', 'Representative', 'HomePage', 'Region']
+    return company[selected_columns].to_dict(orient="records")
+
 df_krx = fdr.StockListing('KRX')
 merged_df = pd.merge(df_krx, df_krx_desc[['Code', 'Sector']], on='Code', how='inner')
 merged_df.fillna({'Sector': '우선주'}, inplace=True)
