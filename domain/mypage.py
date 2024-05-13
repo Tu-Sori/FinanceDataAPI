@@ -14,56 +14,50 @@ router = APIRouter(
 )
 
 
-@router.get("")
-async def get_user_info(user_id: int = Depends(validation_token),
-                        db: Session = Depends(get_db)):
-    user = crud.get_user(db=db, user_id=user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # 관심 주식 정보
+# 관심 주식 정보
+async def get_interest_stocks(user_id: int, db: Session):
     interest_stocks_code = crud.get_interest_stocks_code(db=db, user_id=user_id)
     interest_stocks = []
     for stock in interest_stocks_code:
         stock_data = stockInfo.get_stock_data_by_code(stock.code)
         stock_dict = stock_data.to_dict(orient='records')
         interest_stocks.extend(stock_dict)
+    return interest_stocks
 
-    # 거래 기록 정보
-    stock_records = crud.get_stock_record(db=db, user_id=user_id)
 
+# 거래 기록 정보
+async def get_trade_records(stock_records):
     # 기업 코드, 종목명
     # (DB) 매수일자, 체결일자, 주문수량, 수익금, 수익률
-    sell_records = [] # 매도
-    buy_records = [] # 매수
+    sell_records = []
+    buy_records = []
     for stock_record_obj in stock_records:
+        sell_or_buy = int.from_bytes(stock_record_obj.sell_or_buy, byteorder='little', signed=True)
         code = stock_record_obj.code
         stock_data = stockInfo.get_record_stock_data_by_code(code)
         for i in range(len(stock_data)):
             if code == stock_data['Code'].iloc[i]:
                 record_dict = stock_record_obj.__dict__
                 record_dict['name'] = stock_data['Name'].iloc[i]
-                sell_or_buy = int.from_bytes(stock_record_obj.sell_or_buy, byteorder='little', signed=True)
                 if sell_or_buy == 1:
                     buy_records.append(record_dict)
                 else:
                     sell_records.append(record_dict)
+    return sell_records, buy_records
 
-    # 저장된 주식 정보
-    sell_stock_records = [{
-        "stock_record_id": record.stock_record_id,
-        "record_date": record.record_date
-    } for record in stock_records if record.sell_or_buy]
 
+async def get_save_stocks(buy_stock_records, db: Session):
     save_stocks = []
-    if sell_stock_records:
-        for stock_record in sell_stock_records:
-            save_stock = crud.get_save_stocks(db=db, stock_record_id=stock_record["stock_record_id"])
-            if save_stock:
-                save_stocks.extend(save_stock)
+    for stock_record in buy_stock_records:
+        save_stock = crud.get_save_stocks(db=db, stock_record_id=stock_record["stock_record_id"])
+        if save_stock:
+            save_stocks.extend(save_stock)
+    return save_stocks
 
-    # 기업코드, 종목명, 현재가, 평가손익금, 평가손익률, 보유일(체결일자 기준)
-    # (DB) 매입가, 평단가, 보유수량
+
+# 기업코드, 종목명, 현재가, 평가손익금, 평가손익률, 보유일(체결일자 기준)
+# (DB) 매입가, 평단가, 보유수량
+async def get_saved_stocks_data(save_stocks, buy_stock_records):
     saves = []
     current_date = datetime.today().date()
     for save_stock in save_stocks:
@@ -73,17 +67,34 @@ async def get_user_info(user_id: int = Depends(validation_token),
                 record_dict = save_stock.__dict__
                 record_dict['name'] = stock_data['Name'].iloc[i]
                 record_dict['close'] = stock_data['Close'].iloc[i]
-                # 평가손익금 = 현재가 - 매입가
                 valuation = (int(stock_data['Close'].iloc[i]) - save_stock.purchase)
                 record_dict['valuation'] = valuation
-                # 평가손익률 = 평가손익금 / 매입가 * 100
                 valuation_rate = valuation / save_stock.purchase * 100
                 record_dict['valuation_rate'] = valuation_rate
-                # 보유일
-                record_date = sell_stock_records[i]["record_date"]
+                record_date = buy_stock_records[i]["record_date"]
                 difference = current_date - record_date
                 record_dict['retention_date'] = difference.days
                 saves.append(record_dict)
+    return saves
+
+
+@router.get("")
+async def get_user_info(user_id: int = Depends(validation_token),
+                        db: Session = Depends(get_db)):
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    interest_stocks = await get_interest_stocks(user_id, db)
+
+    stock_records = crud.get_stock_record(db=db, user_id=user_id)
+    sell_records, buy_records = await get_trade_records(stock_records)
+
+    # 저장된 주식 정보
+    buy_stock_records = [{"stock_record_id": record["stock_record_id"]
+                             , "record_date": record["record_date"]} for record in buy_records]
+    save_stocks = await get_save_stocks(buy_stock_records, db)
+    saves = await get_saved_stocks_data(save_stocks, buy_stock_records)
 
     return {
         'user_info': user,
