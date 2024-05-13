@@ -36,7 +36,7 @@ class InterestStock(InterestStockBase):
 
 class StockRecord(BaseModel):
     stock_record_id: int
-    sell_or_buy: bool
+    sell_or_buy: int
     code: str
     sell_or_buy_date: datetime
     record_date: datetime

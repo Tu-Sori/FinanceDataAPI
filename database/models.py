@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, Float, ForeignKey, DateTime, String, Boolean
+from sqlalchemy.dialects.mssql import TINYINT
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -34,7 +35,7 @@ class StockRecord(Base):
    # 매수매도 일지 id(PK), 매수매도 구분, 기업 코드, 매수매도 일자,
    # 체결일자, 체결단가, 주문수량, 수익금, 수익률, 사용자 id(FK)
    stock_record_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-   sell_or_buy = Column(Boolean)
+   sell_or_buy = Column(TINYINT)
    code = Column(String(6))
    sell_or_buy_date = Column(DateTime, default=datetime.utcnow)
    record_date = Column(DateTime, default=datetime.utcnow)

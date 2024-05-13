@@ -34,7 +34,8 @@ async def get_user_info(user_id: int = Depends(validation_token),
 
     # 기업 코드, 종목명
     # (DB) 매수일자, 체결일자, 주문수량, 수익금, 수익률
-    records = []
+    sell_records = [] # 매도
+    buy_records = [] # 매수
     for stock_record_obj in stock_records:
         code = stock_record_obj.code
         stock_data = stockInfo.get_record_stock_data_by_code(code)
@@ -42,7 +43,11 @@ async def get_user_info(user_id: int = Depends(validation_token),
             if code == stock_data['Code'].iloc[i]:
                 record_dict = stock_record_obj.__dict__
                 record_dict['name'] = stock_data['Name'].iloc[i]
-                records.append(record_dict)
+                sell_or_buy = int.from_bytes(stock_record_obj.sell_or_buy, byteorder='little', signed=True)
+                if sell_or_buy == 1:
+                    buy_records.append(record_dict)
+                else:
+                    sell_records.append(record_dict)
 
     # 저장된 주식 정보
     sell_stock_records = [{
@@ -83,6 +88,7 @@ async def get_user_info(user_id: int = Depends(validation_token),
     return {
         'user_info': user,
         'interest_stocks': interest_stocks if interest_stocks else None,
-        'stock_records': records if records else None,
+        'sell_records': sell_records if sell_records else None,
+        'buy_records': buy_records if buy_records else None,
         'save_stocks': saves if saves else None
     }
