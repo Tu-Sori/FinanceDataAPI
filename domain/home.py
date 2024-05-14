@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException, Path, Depends, Header
-from fastapi.responses import FileResponse
+# from fastapi.responses import FileResponse
 
 import mplfinance as mpf
 import matplotlib.pyplot as plt
@@ -70,74 +70,48 @@ async def get_market_chart(market: str = Path(..., description="Market: kospi, k
                            chart_type: str = Query(..., description="Chart type: weekly, monthly, 3months, 1years, 3years, 10years")):
     date_ranges = stockInfo.calculate_date_ranges()
 
-    market_data = None
     if market.lower() == "kospi":
         if chart_type == "weekly":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["one_week_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='candle', volume=True, style='classic', title='KOSPI Weekly Chart')
-            image_path = "kospi_weekly_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "monthly":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["one_month_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='candle', volume=True, style='classic', title='KOSPI Monthly Chart')
-            image_path = "kospi_monthly_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "3months":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["three_months_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='candle', volume=True, style='classic', title='KOSPI 3 Months Chart')
-            image_path = "kospi_3months_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "1years":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["one_year_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSPI 1 Year Chart')
-            image_path = "kospi_1years_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "3years":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["three_years_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSPI 3 Years Chart')
-            image_path = "kospi_3years_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "10years":
             market_data = stockInfo.get_stock_data('KS11', date_ranges["ten_years_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSPI 10 Years Chart')
-            image_path = "kospi_10years_chart.png"
-            plt.savefig(image_path)
         else:
             raise HTTPException(status_code=404, detail="Chart type not found")
     elif market.lower() == "kosdaq":
         if chart_type == "weekly":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["one_week_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='candle', volume=True, style='classic', title='KOSDAQ Weekly Chart')
-            image_path = "kosdaq_weekly_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "monthly":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["one_month_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='candle', volume=True, style='classic', title='KOSDAQ Monthly Chart')
-            image_path = "kosdaq_monthly_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "3months":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["three_months_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=True, style='classic', title='KOSDAQ 3 Months Chart')
-            image_path = "kosdaq_3months_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "1years":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["one_year_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSDAQ 1 Year Chart')
-            image_path = "kosdaq_1years_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "3years":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["three_years_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSDAQ 3 Years Chart')
-            image_path = "kosdaq_3years_chart.png"
-            plt.savefig(image_path)
         elif chart_type == "10years":
             market_data = stockInfo.get_stock_data('KQ11', date_ranges["ten_years_ago"], date_ranges["current_date"])
             mpf.plot(market_data, type='line', volume=False, style='classic', title='KOSDAQ 10 Years Chart')
-            image_path = "kosdaq_10years_chart.png"
-            plt.savefig(image_path)
         else:
             raise HTTPException(status_code=404, detail="Chart type not found")
     else:
         raise HTTPException(status_code=404, detail="Market not found")
 
-    return FileResponse(image_path, media_type="image/png")
