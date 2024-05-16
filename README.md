@@ -31,7 +31,7 @@ pip install python-dotenv
 
 > **SQL**
 ```
-conda install mysqlclient
+sudo apt install pkg-config
 pip install SQLAlchemy
 pip install mysql
 ```
