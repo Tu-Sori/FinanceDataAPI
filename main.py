@@ -14,7 +14,8 @@ elastic_ip = os.getenv("ELASTIC_IP")
 
 origins = [
     "http://localhost:3000",
-    f"http://{elastic_ip}"
+    f"http://{elastic_ip}",
+    "http://host.docker.internal:3000"
 ]
 
 app.add_middleware(
