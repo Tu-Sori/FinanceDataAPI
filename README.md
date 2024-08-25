@@ -59,7 +59,7 @@ uvicorn main:app --reload
 
 ## Reference
 - [FinanceDataReader](https://github.com/FinanceData/FinanceDataReader?tab=readme-ov-file)
-- [Pykrx](https://github.com/sharebook-kr/pykrx)
+- [PyKrx](https://github.com/sharebook-kr/pykrx)
 
 ## 기타
 pip 오류나는 경우
